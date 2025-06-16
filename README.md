@@ -60,13 +60,3 @@ Abra um Pull Request
 
 Qualquer dúvida, me chama!
 Klynton Faustino
-
-
-Salve o arquivo (`Ctrl+S` ou `Cmd+S`).
-
-Faça o commit e push dessas mudanças para o GitHub:
-```bash
-
-git add README.md
-git commit -m "Atualiza README com instruções completas"
-git push
