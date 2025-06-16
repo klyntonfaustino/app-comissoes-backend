@@ -8,13 +8,13 @@ router = APIRouter()
 
 #Endpoint GET - recebe os dados via query parameters
 @router.get("/comissao", response_model=ComissaoResponse)
-def calcular_comissao_endpoint(request:ComissaoRequest):
+def calcular_comissao_endpoint(valor_carga: float, percentual_comissao: float):
 
     try:
-        valor_comissao = calcular_comissao(request.valor_carga, request.percentual_comissao)
+        valor_comissao = calcular_comissao(valor_carga, percentual_comissao)
         return ComissaoResponse(
-            valor_carga=request.valor_carga,
-            percentual_comissao=request.percentual_comissao,
+            valor_carga=valor_carga,
+            percentual_comissao=percentual_comissao,
             valor_comissao=valor_comissao
         )
     except Exception as e:
@@ -32,3 +32,4 @@ def calcular_comissao_post(request: ComissaoRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"erro no cálculo:{str(e)}")
+    
