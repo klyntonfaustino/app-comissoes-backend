@@ -1,5 +1,4 @@
 #app/routes.py
-
 from fastapi import APIRouter, Query, HTTPException, Body
 from app.services import calcular_comissao
 from app.models import ComissaoRequest, ComissaoResponse, CargaModel, DashbordSummary
