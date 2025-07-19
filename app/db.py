@@ -1,50 +1,39 @@
 # db.py
 import mysql.connector
-from mysql.connector import Error
-from decimal import Decimal
+import os
 
 def conectar():
     try:
-        conexao = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="maju9988",
-            database="comissao_db",
-            port=3306
+        conn = mysql.connector.connect(
+            host=os.getenv("DB_HOST", "localhost"),
+            user=os.getenv("DB_USER", "root"),
+            password=os.getenv("DB_PASSWORD", "password"),
+            database=os.getenv("BD_NAME", "comissoes"),
         )
-
-        if conexao.is_connected():
-            print("Conectado ao MySQL com sucesso!")
-            return conexao
-    except Error as e:
-        print(f"Erro ao conectar ao MySQL: {e}")
-        return None
+        return conn
+    except mysql.connector.Error as err:
+        print(f"Erro ao conectar ao banco de dados: {err}")
+        raise
 
 def get_dashbord_summary():
     conn = None
     cursor = None
     try:
         conn = conectar()
-        if conn is None:
-            print("Não foi possível conectar ao banco de dados.")
-            return None
         cursor = conn.cursor()
+        cursor.execute("SELECT SUM(valor) AS total_cargas, SUM(valor * percentual / 100) AS total_comissoes FROM cargas")
+        result = cursor.fetchone()
 
+        total_cargas = result[0] if result[0] is not None else 0.00
+        total_comissoes = result[1] if result[1] is not None else 0.00
 
-        cursor.execute("SELECT SUM(valor) FROM cargas")
-        total_cargas_bruto = cursor.fetchone()[0]
-        total_cargas = Decimal(str(total_cargas_bruto)) if total_cargas_bruto is not None else Decimal('0.00')
-
-        cursor.execute("SELECT SUM(valor * percentual / 100) FROM cargas")
-        total_comissoes_bruto = cursor.fetchone()[0]
-        total_comissoes = Decimal(str(total_comissoes_bruto)) if total_comissoes_bruto is not None else Decimal('0.00')
-
-        return{
-            "total_cargas": total_cargas,
-            "total_comissoes": total_comissoes
+        from decimal import Decimal
+        return {
+            "total_cargas": Decimal (total_cargas),
+            "total_comissoes": Decimal (total_comissoes)
         }
-    except Error as err:
-        print(f"Erro ao obter resumo do dashboard: {err}")
+    except Exception as e:
+        print(f"Erro ao obter resumo do dashboard: {e}")
         return None
     finally:
         if cursor:

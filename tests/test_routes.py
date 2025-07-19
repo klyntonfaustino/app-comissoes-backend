@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 #Garante que o diretório raiz do projeto no sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from main import app
+from app.main import app
 
 client = TestClient(app)
 
