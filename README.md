@@ -36,17 +36,6 @@ uvicorn main:app --reload
 5. Acesse no navegador ou via API client:
 http://127.0.0.1:8000/comissao?valor_carga=1500&percentual_comissao=12
 
-## Estrutura do projeto
-
-app-comissoes-backend/
-├── app/
-│   ├── __init__.py
-│   └── routes.py          # Define as rotas da API
-├── main.py                # Arquivo principal da API FastAPI
-├── README.md              # Documentação do projeto
-├── .gitignore             # Arquivos ignorados pelo Git
-└── venv/                  # Ambiente virtual (não commitado)
-
 Como contribuir
 Faça um fork deste repositório
 
