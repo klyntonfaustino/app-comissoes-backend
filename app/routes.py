@@ -1,7 +1,7 @@
 #app/routes.py
 from fastapi import APIRouter, Query, HTTPException, Body
 from app.services import calcular_comissao
-from app.models import ComissaoRequest, ComissaoResponse, CargaModel, DashbordSummary
+from app.models import ComissaoRequest, ComissaoResponse, CargaModel, DashbordSummary, CargaResponseModel
 from app.db import conectar, get_dashbord_summary
 import mysql.connector
 from datetime import date
@@ -36,7 +36,7 @@ def calcular_comissao_post(request: ComissaoRequest):
         raise HTTPException(status_code=400, detail=f"erro no cálculo:{str(e)}")
     
 # GET - lista todas as cargas salvas no banco de dados
-@router.get("/cargas")
+@router.get("/cargas", response_model=list[CargaResponseModel])
 def listar_cargas(
     data_inicio: Optional[date] = Query(None, description="Data de início para filtrar (YYYY-MM-DD)"),
     data_fim: Optional[date] = Query(None, description="Data de fim para filtrar (YYYY-MM-DD)") 
@@ -45,7 +45,7 @@ def listar_cargas(
         conn = conectar()
         cursor = conn.cursor(dictionary=True)
 
-        sql_query = "SELECT id, descricao, valor, percentual, data_carga, (valor * percentual /100) AS Comissao from cargas"
+        sql_query = "SELECT id, descricao, valor, percentual AS percentual_comissao, data_carga, (valor * percentual /100) AS comissao from cargas"
         params = []
         conditions = []
 
@@ -68,25 +68,32 @@ def listar_cargas(
         raise HTTPException(status_code=500, detail=f"Erro ao listar cargas: {str(e)}")
     
 # POST - adicionar nova carga no banco de dados
-@router.post("/cargas", status_code=201)
+@router.post("/cargas", status_code=201, response_model=CargaResponseModel)
 def adicionar_carga(carga: CargaModel = Body(...)):
     try:
         conn = conectar()
         cursor = conn.cursor()
+
+        comissao_calculada = (carga.valor * carga.percentual_comissao) / 100
+
         cursor.execute(
-            "INSERT INTO cargas (descricao, valor, percentual, data_carga) VALUES (%s, %s, %s, %s)",
-            (carga.descricao, carga.valor, carga.percentual_comissao, carga.data_carga)
+            "INSERT INTO cargas (descricao, valor, percentual, data_carga, comissao) VALUES (%s, %s, %s, %s, %s)",
+            (carga.descricao, carga.valor, carga.percentual_comissao, carga.data_carga, comissao_calculada)
         )
         conn.commit()
+
+        new_id = cursor.lastrowid
+
         cursor.close()
         conn.close()
 
         return {
+            "id": new_id,
             "descricao": carga.descricao,
             "valor": carga.valor,
-            "percentual": carga.percentual_comissao,
+            "percentual_comissao": carga.percentual_comissao,
             "data_carga": carga.data_carga,
-            "comissao": (carga.valor * carga.percentual_comissao) / 100
+            "comissao": comissao_calculada
     }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao adicionar carga: {str(e)}")

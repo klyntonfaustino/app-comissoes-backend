@@ -20,6 +20,13 @@ class CargaModel(BaseModel):
     percentual_comissao: float = Field(..., gt=0, le=100, description="percentual da comissao, entre 0 e 100")
     data_carga: date
 
+class CargaResponseModel(CargaModel):
+    id: int
+    comissao: Optional[float] = None
+
+    class Config:
+        from_attributes = True
+
 class DashbordSummary(BaseModel):
     total_cargas: Decimal
     total_comissoes: Decimal
