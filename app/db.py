@@ -29,8 +29,8 @@ def get_dashbord_summary():
 
         from decimal import Decimal
         return {
-            "total_cargas": Decimal (total_cargas),
-            "total_comissoes": Decimal (total_comissoes)
+            "total_cargas": float (total_cargas),
+            "total_comissoes": float (total_comissoes)
         }
     except Exception as e:
         print(f"Erro ao obter resumo do dashboard: {e}")
